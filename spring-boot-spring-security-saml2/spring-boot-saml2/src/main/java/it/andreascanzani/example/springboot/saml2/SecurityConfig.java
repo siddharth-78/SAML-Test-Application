@@ -18,6 +18,7 @@ import org.springframework.security.saml2.provider.service.metadata.OpenSamlMeta
 import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
+import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.saml2.provider.service.servlet.filter.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
@@ -51,8 +52,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	    RelyingPartyRegistration registration = RelyingPartyRegistration
 	            .withRegistrationId("okta-saml")
 	            .assertingPartyDetails(party -> party
-	                .entityId("http://www.okta.com/exk6sni93NCyDl9VP5d6")
-	                .singleSignOnServiceLocation("https://dev-11017565.okta.com/app/dev-11017565_appsaml_1/exk6sni93NCyDl9VP5d6/sso/saml")
+	                .entityId("http://www.okta.com/exkencydijGCmCVdZ5d7")
+	                .singleSignOnServiceLocation("https://dev-74229794.okta.com/app/dev-74229794_samltestapplication_1/exkencydijGCmCVdZ5d7/sso/saml")
 	                .wantAuthnRequestsSigned(false)
 	                .verificationX509Credentials(c -> c.add(credential))
 	            ).build();
