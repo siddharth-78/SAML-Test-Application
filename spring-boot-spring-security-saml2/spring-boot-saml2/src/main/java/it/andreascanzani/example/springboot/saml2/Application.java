@@ -27,4 +27,13 @@ public class Application {
 		return "hello";
 	}
 
+	// SP Initiated works with SAML disabled!
+	// IDP Initiated does NOT WORK.
+
+//	@RequestMapping("/secured/hello")
+//	public String hello() {
+//		//model.addAttribute("name", principal.getName());
+//		return "hello";
+//	}
+
 }
