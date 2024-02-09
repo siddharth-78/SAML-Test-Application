@@ -39,9 +39,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         if (isSamlEnabled) {
             http
-                    .authorizeRequests()
-                    .anyRequest().authenticated()
-                    .and()
+                    .csrf().disable()
+                    .authorizeRequests(authorize -> authorize
+                            .antMatchers("/saml2/**").permitAll()
+                            .anyRequest().authenticated())
                     .saml2Login();
 
             Converter<HttpServletRequest, RelyingPartyRegistration> relyingPartyRegistrationResolver = new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
