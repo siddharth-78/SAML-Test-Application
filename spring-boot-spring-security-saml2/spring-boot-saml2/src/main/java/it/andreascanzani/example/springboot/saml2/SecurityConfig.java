@@ -43,15 +43,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         if (isSamlEnabled) {
             http
-                    .csrf().disable()
-                    .authorizeRequests(authorize -> authorize
-                            .antMatchers("/saml2/**").permitAll()
-                            .anyRequest().authenticated())
+                    .authorizeRequests()
+                    .anyRequest().authenticated()
+                    .and()
                     .saml2Login();
 
 //            Converter<HttpServletRequest, RelyingPartyRegistration> relyingPartyRegistrationResolver = new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
 //            Saml2MetadataFilter filter = new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
 //            http.addFilterBefore(filter, Saml2WebSsoAuthenticationFilter.class);
+
         } else {
             System.out.println("SAML not enabled...");
         }
