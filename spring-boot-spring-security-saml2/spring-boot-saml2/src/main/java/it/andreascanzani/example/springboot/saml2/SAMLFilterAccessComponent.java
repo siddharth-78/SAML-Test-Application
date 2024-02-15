@@ -13,24 +13,24 @@ import static it.andreascanzani.example.springboot.saml2.Application.ctx;
 
 public class SAMLFilterAccessComponent {
 
-    public static Saml2WebSsoAuthenticationRequestFilter findSaml2WebSsoAuthenticationRequestFilter() {
+    public static Filter findSaml2WebSsoAuthenticationRequestFilter() {
         FilterChainProxy filterChainProxy = ctx.getBean(FilterChainProxy.class);
         for (SecurityFilterChain chain : filterChainProxy.getFilterChains()) {
             for (Filter filter : chain.getFilters()) {
-                if (filter instanceof Saml2WebSsoAuthenticationRequestFilter) {
-                    return (Saml2WebSsoAuthenticationRequestFilter) filter;
+                if (filter.getClass().getName().contains("Saml2WebSsoAuthenticationRequestFilter")) {
+                    return filter;
                 }
             }
         }
         return null; // Filter not found
     }
 
-    public static Saml2WebSsoAuthenticationFilter findSaml2WebSsoAuthenticationFilter() {
+    public static Filter findSaml2WebSsoAuthenticationFilter() {
         FilterChainProxy filterChainProxy = ctx.getBean(FilterChainProxy.class);
         for (SecurityFilterChain chain : filterChainProxy.getFilterChains()) {
             for (Filter filter : chain.getFilters()) {
-                if (filter instanceof Saml2WebSsoAuthenticationFilter) {
-                    return (Saml2WebSsoAuthenticationFilter) filter;
+                if (filter.getClass().getName().contains("Saml2WebSsoAuthenticationFilter")) {
+                    return filter;
                 }
             }
         }

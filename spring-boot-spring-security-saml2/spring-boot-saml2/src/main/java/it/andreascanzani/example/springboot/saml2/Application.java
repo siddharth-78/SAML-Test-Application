@@ -36,24 +36,9 @@ public class Application {
 		ctx = SpringApplication.run(Application.class, args);
 		System.out.println("Trial Over");
 
-		// TimeUnit.SECONDS.sleep(30);
 		RelyingPartyRegistrationRepository relyingPartyRegistrationRepository = ctx.getBean(RelyingPartyRegistrationRepository.class);
 
-		// Get the 3 Filters Required
-		Saml2WebSsoAuthenticationRequestFilter saml2WebSsoAuthenticationRequestFilter =
-			//new Saml2WebSsoAuthenticationRequestFilter(relyingPartyRegistrationRepository);
-		SAMLFilterAccessComponent.findSaml2WebSsoAuthenticationRequestFilter();
-
-		Converter<HttpServletRequest, RelyingPartyRegistration> relyingPartyRegistrationResolver = new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
-		Saml2MetadataFilter saml2MetadataFilter = new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
-
-		Saml2WebSsoAuthenticationFilter saml2WebSsoAuthenticationFilter =
-				//new Saml2WebSsoAuthenticationFilter(relyingPartyRegistrationRepository);
-				SAMLFilterAccessComponent.findSaml2WebSsoAuthenticationFilter();
-
-
 		FilterChainProxy filterChainProxy = ctx.getBean(FilterChainProxy.class);
-
 		try {
 			Field filterChainField = FilterChainProxy.class.getDeclaredField("filterChains");
 			filterChainField.setAccessible(true);
@@ -61,30 +46,16 @@ public class Application {
 			List<DefaultSecurityFilterChain> existingFilterChains =
 					new ArrayList<>((List<DefaultSecurityFilterChain>) filterChainField.get(filterChainProxy));
 
-			for(int i = 0; i < existingFilterChains.size(); i++) {
-
-				DefaultSecurityFilterChain chain = existingFilterChains.get(i);
-				if(chain.getRequestMatcher() instanceof AnyRequestMatcher) {
-					List<Filter> updatedFilters = new ArrayList<>(chain.getFilters());
-
-					removeTheFilters(updatedFilters);
-
-					updatedFilters.add(5, saml2WebSsoAuthenticationRequestFilter);
-					updatedFilters.add(6, saml2MetadataFilter);
-					updatedFilters.add(7, saml2WebSsoAuthenticationFilter);
-
-					DefaultSecurityFilterChain updatedFilterChain =
-							new DefaultSecurityFilterChain(chain.getRequestMatcher(), updatedFilters);
-					existingFilterChains.set(i, updatedFilterChain);
-					break;
-				}
-			}
+			existingFilterChains.add(0, FilterAccess.getSAMLDefaultSecurityFilterChain());
+			// existingFilterChains.remove(1); // DANGER
 
 			filterChainField.set(filterChainProxy, existingFilterChains);
+
 		}
 		catch (NoSuchFieldException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	private static void removeTheFilters(List<Filter> filter) {

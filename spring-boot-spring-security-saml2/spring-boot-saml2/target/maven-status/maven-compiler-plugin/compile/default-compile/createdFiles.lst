@@ -1,3 +1,4 @@
 it/andreascanzani/example/springboot/saml2/SecurityConfig.class
 it/andreascanzani/example/springboot/saml2/Application.class
+it/andreascanzani/example/springboot/saml2/SAMLFilterAccessComponent.class
 it/andreascanzani/example/springboot/saml2/CertificateValidator.class
