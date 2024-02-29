@@ -7,6 +7,10 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -18,12 +22,12 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.servlet.filter.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
-import org.springframework.security.saml2.provider.service.web.Saml2WebSsoAuthenticationRequestFilter;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -35,7 +39,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private RelyingPartyRegistrationRepository relyingPartyRegistrationRepository;
 
     @Autowired(required = false)
-    private Saml2WebSsoAuthenticationRequestFilter sws;
+    private SAMLAuthenticationProvider samlAuthenticationProvider;
+
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) {
+//        if(isSamlEnabled) {
+//            auth.authenticationProvider(cmfsamlAuthenticationProvider);
+//        }
+//    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -46,13 +57,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .authorizeRequests()
                     .anyRequest().authenticated()
                     .and()
-                    .saml2Login();
+                    .saml2Login()
+                    .authenticationManager(samlAuthenticationManager());
+
             Converter<HttpServletRequest, RelyingPartyRegistration> relyingPartyRegistrationResolver = new DefaultRelyingPartyRegistrationResolver(relyingPartyRegistrationRepository);
             Saml2MetadataFilter filter = new Saml2MetadataFilter(relyingPartyRegistrationResolver, new OpenSamlMetadataResolver());
             http.addFilterBefore(filter, Saml2WebSsoAuthenticationFilter.class);
         } else {
             System.out.println("SAML not enabled...");
         }
+    }
+
+    @Bean
+    public AuthenticationManager samlAuthenticationManager() {
+        return new ProviderManager(Arrays.asList(samlAuthenticationProvider));
     }
 
     @Bean
