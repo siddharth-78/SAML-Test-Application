@@ -25,6 +25,8 @@ public class CertificateValidator {
             fis.close();
 
             certificate.checkValidity(new Date()); // Check if the certificate is valid at the current date
+            System.out.println("Signature Algorithm of the certificate: " + certificate.getSigAlgName());
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -35,7 +37,8 @@ public class CertificateValidator {
     //private static ResourceLoader resourceLoader = new DefaultResourceLoader();
     public static void main(String[] args) {
 
-        String certPath = "/Users/sbaranidharan/Desktop/okta.crt";
+        String certPath = "/Users/sbaranidharan/Desktop/saml-certs/certificate.crt";
+        certPath = "/Users/sbaranidharan/Desktop/saml-certs/sha1/certificate.crt";
       //  Resource resource = resourceLoader.getResource("file:" + certPath);
 
         if(isCertificateValid(certPath)) {
