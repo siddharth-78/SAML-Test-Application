@@ -71,7 +71,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .authorizeRequests()
                     .anyRequest().authenticated()
                     .and()
-                    .saml2Login();
+                    .saml2Login()
+                    .and()
+                    .saml2Logout();
                     //.successHandler(new SAML2AuthenticationSuccessHandler());
                     //.authenticationManager(samlAuthenticationManager());
 
@@ -106,6 +108,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         String entityId = "http://www.okta.com/exkergz3wavtE4dNl5d7";
         String sso = "https://dev-74229794.okta.com/app/dev-74229794_cmsamltest_2/exkergz3wavtE4dNl5d7/sso/saml";
+        String idpSlo = "https://dev-74229794.okta.com/app/dev-74229794_cmsamltest_2/exkergz3wavtE4dNl5d7/slo/saml";
         String idpCertificatePath = "classpath:saml-certificate/okta.crt";
         String spPrivateKeyPath = "file:/Users/sbaranidharan/Desktop/saml-certs/sha1/private.key";
         String spCertificatePath = "file:/Users/sbaranidharan/Desktop/saml-certs/sha1/certificate.crt";
@@ -123,10 +126,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .withRegistrationId("okta-saml") // done
                     .signingX509Credentials((c) -> c.add(Saml2X509Credential.signing(spPrivateKey, spCertificate)))
                     .decryptionX509Credentials((c) -> c.add(Saml2X509Credential.decryption(spPrivateKey, spCertificate)))
-                    .singleLogoutServiceLocation("{baseUrl}/logout/saml2/sso/okta-saml")
+                    .singleLogoutServiceLocation("{baseUrl}/logout/saml2/slo")
                     .assertingPartyDetails(party -> party
                             .entityId(entityId) // done
                             .singleSignOnServiceLocation(sso) // done
+                            .singleLogoutServiceLocation(idpSlo)
                             .verificationX509Credentials(c -> c.add(verificationCredential))
                             .wantAuthnRequestsSigned(true)
                             .encryptionX509Credentials((c) -> Saml2X509Credential.encryption(idpCertificate))
