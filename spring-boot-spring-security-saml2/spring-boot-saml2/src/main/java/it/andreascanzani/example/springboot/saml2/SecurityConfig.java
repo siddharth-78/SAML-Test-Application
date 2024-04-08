@@ -6,6 +6,7 @@ import org.opensaml.xmlsec.signature.support.SignatureConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -25,6 +26,9 @@ import org.springframework.security.saml2.provider.service.registration.*;
 import org.springframework.security.saml2.provider.service.servlet.filter.Saml2WebSsoAuthenticationFilter;
 import org.springframework.security.saml2.provider.service.web.DefaultRelyingPartyRegistrationResolver;
 import org.springframework.security.saml2.provider.service.web.Saml2MetadataFilter;
+import org.springframework.security.saml2.provider.service.web.authentication.logout.Saml2LogoutRequestRepository;
+import org.springframework.security.saml2.provider.service.web.authentication.logout.Saml2LogoutResponseFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -65,15 +69,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-
+        System.out.println("Meow");
         if (isSamlEnabled) {
             http
                     .authorizeRequests()
                     .anyRequest().authenticated()
                     .and()
-                    .saml2Login()
+                        .logout()
+                                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+//                        .logoutSuccessHandler(new CMFLogoutSuccessHandler())
                     .and()
-                    .saml2Logout();
+                        .saml2Login()
+                    .and()
+                        .saml2Logout();
                     //.successHandler(new SAML2AuthenticationSuccessHandler());
                     //.authenticationManager(samlAuthenticationManager());
 
@@ -110,8 +118,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         String sso = "https://dev-74229794.okta.com/app/dev-74229794_cmsamltest_2/exkergz3wavtE4dNl5d7/sso/saml";
         String idpSlo = "https://dev-74229794.okta.com/app/dev-74229794_cmsamltest_2/exkergz3wavtE4dNl5d7/slo/saml";
         String idpCertificatePath = "classpath:saml-certificate/okta.crt";
-        String spPrivateKeyPath = "file:/Users/sbaranidharan/Desktop/saml-certs/sha1/private.key";
-        String spCertificatePath = "file:/Users/sbaranidharan/Desktop/saml-certs/sha1/certificate.crt";
+        String spPrivateKeyPath = "file:/Users/sbaranidharan/Desktop/saml-certs/sample-saml/private.key";
+        String spCertificatePath = "file:/Users/sbaranidharan/Desktop/saml-certs/sample-saml/certificate.crt";
 
         try {
 
