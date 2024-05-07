@@ -8,6 +8,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.security.saml2.provider.service.metadata.OpenSamlMetadataResolver;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
@@ -45,47 +47,10 @@ import java.util.concurrent.TimeUnit;
 public class Application {
 
 	public static ApplicationContext ctx;
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 		ctx = SpringApplication.run(Application.class, args);
-		System.out.println("TopG");
-		System.out.println("Trial Over");
-
-		RelyingPartyRegistrationRepository relyingPartyRegistrationRepository = ctx.getBean(RelyingPartyRegistrationRepository.class);
-
-		FilterChainProxy filterChainProxy = ctx.getBean(FilterChainProxy.class);
-		try {
-			Field filterChainField = FilterChainProxy.class.getDeclaredField("filterChains");
-			filterChainField.setAccessible(true);
-
-			List<DefaultSecurityFilterChain> existingFilterChains =
-					new ArrayList<>((List<DefaultSecurityFilterChain>) filterChainField.get(filterChainProxy));
-
-			existingFilterChains.add(0, FilterAccess.getSAMLDefaultSecurityFilterChain());
-			// existingFilterChains.remove(1); // DANGER
-
-			filterChainField.set(filterChainProxy, existingFilterChains);
-
-		}
-		catch (NoSuchFieldException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
 	}
 
-	private static void removeTheFilters(List<Filter> filter) {
-
-		for(int i = 0; i < filter.size(); i++) {
-
-			if(filter.get(i) instanceof Saml2WebSsoAuthenticationRequestFilter ||
-			filter.get(i) instanceof Saml2WebSsoAuthenticationFilter) {
-				filter.remove(i);
-				i--;
-			}
-
-			System.out.println("will i work :(");
-
-		}
-	}
 
 	@RequestMapping("/")
 	public String index() {
@@ -93,89 +58,17 @@ public class Application {
 	}
 
 	@RequestMapping("/secured/hello")
-	public String hello(@AuthenticationPrincipal Saml2AuthenticatedPrincipal principal, Model model) {
+	public String hello(Model model) {
+
+		Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) SecurityContextHolder.
+				getContext().
+				getAuthentication().
+				getPrincipal();
+
 		model.addAttribute("name", principal.getName());
+		model.addAttribute("UserAttributes", principal.getAttributes());
+
 		return "hello";
 	}
-
-	// SP Initiated works with SAML disabled!
-	// IDP Initiated does NOT WORK.
-
-//	@RequestMapping("/secured/hello")
-//	public String hello() {
-//		//model.addAttribute("name", principal.getName());
-//		return "hello";
-//	}
-
-//	@RequestMapping(value="/cmf/saml2/logout", method = RequestMethod.GET)
-//	public void cmfSamlLogout(HttpServletRequest request, HttpServletResponse response) {
-//
-//		System.out.println("Itss mez");
-//
-//		HttpSession session = request.getSession(false);
-//
-//		String logoutUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-//				.path("/logout")
-//				.build()
-//				.toUriString();
-//
-//		// Create an instance of RestTemplate
-//		RestTemplate restTemplate = new RestTemplate();
-//
-//		// Create an instance of HttpHeaders
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-//
-//		// Set the session ID in the headers
-//		String sessionId = session.getId();
-//		headers.set("Cookie", "JSESSIONID=" + sessionId);
-//
-//		// Get the CSRF token from the session
-//		CsrfToken csrfToken = (CsrfToken) session.getAttribute("org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository.CSRF_TOKEN");
-//
-//		if (csrfToken != null) {
-//			// Set the CSRF token as a form parameter
-//			requestBody.add("_csrf", csrfToken.getToken());
-//		}
-//
-//		// Create a MultiValueMap to hold the request parameters
-//		MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-//		// Add any necessary request parameters to the requestBody
-//
-//		// Create an HttpEntity with the requestBody and headers
-//		HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-//
-//		try {
-//			// Send the POST request to the /logout endpoint
-//			ResponseEntity<String> responseEntity = restTemplate.postForEntity(logoutUrl, requestEntity, String.class);
-//
-//			// Check the response status code
-//			if (responseEntity.getStatusCode().is2xxSuccessful()) {
-//				// Redirect to the appropriate page after successful logout
-//				response.sendRedirect("/logout-success");
-//			} else {
-//				// Handle the error case
-//				response.sendRedirect("/logout-error");
-//			}
-//		} catch (Exception e) {
-//			// Handle any exceptions that occurred during the request
-//			System.out.println("WE messed up :/");
-//		}
-//	}
-
-	@RequestMapping(value="/cmf/saml2/logout", method = RequestMethod.GET)
-	public void cmfSamlLogout(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/logout");
-		dispatcher.forward(request, response);
-	}
-
-	@RequestMapping(value="/logout", method = RequestMethod.POST)
-	public void handleInternalLogout(HttpServletRequest request, HttpServletResponse response) {
-		// Here, implement the logic that you would have executed on receiving a direct POST request to /logout
-
-		// Since this is an internal forward, the original security context is preserved
-	}
-
 
 }
